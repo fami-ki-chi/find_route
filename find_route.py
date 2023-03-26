@@ -41,7 +41,7 @@ class Trie:
             node.nexthop = nexthop
 
 
-    def find_route(self, ip_address) -> 'Trie':
+    def longest_match(self, ip_address) -> 'Trie':
         node = self.root
         
         for char in ip_address:
@@ -61,7 +61,7 @@ def decimal_to_binary(decimal_addr):
 
         return binary_addr
 
-def longest_match(dest_addr, csv_file):
+def find_route(dest_addr, csv_file):
 
     try:
         # Open CSV file
@@ -84,7 +84,7 @@ def longest_match(dest_addr, csv_file):
                     trie.insert(row[1],row[3],row[4])
 
             binary_dest_addr = decimal_to_binary(dest_addr)
-            match = trie.find_route(binary_dest_addr)
+            match = trie.longest_match(binary_dest_addr)
 
             if match.is_leaf == False:
                 if default_gateway_type:
@@ -109,9 +109,9 @@ def longest_match(dest_addr, csv_file):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print("Usage: python find_route.py Dest_Addr(X.X.X.X) RouteTable.csv")
+        print("Usage: python longest_match.py Dest_Addr(X.X.X.X) RouteTable.csv")
         sys.exit()
 
     dest_addr = str(sys.argv[1])
     csv_file = str(sys.argv[2])
-    sys.exit(longest_match(dest_addr, csv_file))
+    sys.exit(find_route(dest_addr, csv_file))
