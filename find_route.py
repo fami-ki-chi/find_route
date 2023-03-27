@@ -109,7 +109,7 @@ def find_route(dest_addr, csv_file):
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
-        print("Usage: python longest_match.py Dest_Addr(X.X.X.X) RouteTable.csv")
+        print("Usage: python find_route.py Dest_Addr(X.X.X.X) RouteTable.csv")
         sys.exit()
 
     dest_addr = str(sys.argv[1])
