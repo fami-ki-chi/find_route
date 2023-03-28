@@ -9,8 +9,7 @@ class TrieNode:
         self.children = {}
         self.is_leaf = False
         self.prefix = None
-        self.nexthoptype = None
-        self.nexthop = None
+        self.nexthop = []
 
 
 class Trie:
@@ -31,26 +30,23 @@ class Trie:
             node = node.children[char]
 
         node.is_leaf = True
-        node.prefix = prefix   
-
-        if node.nexthoptype:
-            node.nexthoptype = node.nexthoptype + ' ,' + nexthoptype
-            node.nexthop = node.nexthop + ' ,' + nexthop
-        else:
-            node.nexthoptype = nexthoptype
-            node.nexthop = nexthop
+        node.prefix = prefix
+        node.nexthop.append(nexthop + ' (' + nexthoptype + ')')
 
 
     def longest_match(self, ip_address) -> 'Trie':
         node = self.root
+        matched_node = node
         
         for char in ip_address:
             if char in node.children:
                 node = node.children[char]
+                if node.is_leaf:
+                    matched_node = node
             else:
                 break
         
-        return node
+        return matched_node
 
 
 def decimal_to_binary(decimal_addr):
@@ -70,15 +66,12 @@ def find_route(dest_addr, csv_file):
             next(reader)
 
             trie = Trie()
-            default_gateway_type = ''
-            default_gateway = ''
+            default_gateway = []
 
             for row in reader:
-
                 # NIC effective route: row = [RouteSource, DestinationSubnets, DestinationServiceTags, NextHopType, NextHops, IsEnabled]
                 if row[1] == '0.0.0.0/0':
-                    default_gateway_type = default_gateway_type + row[3]
-                    default_gateway =  default_gateway + row[4]
+                    default_gateway.append(row[4] + ' (' + row[3] + ')')
                 else:
                     # Insert routes
                     trie.insert(row[1],row[3],row[4])
@@ -87,18 +80,24 @@ def find_route(dest_addr, csv_file):
             match = trie.longest_match(binary_dest_addr)
 
             if match.is_leaf == False:
-                if default_gateway_type:
+                if default_gateway:
                     print(f"Route to {dest_addr} is found!")
-                    print(f"  Prefix: 0.0.0.0/0")
-                    print(f"  NextHopType: {default_gateway_type}")
-                    print(f"  NextHop: {default_gateway}")
+                    print(f"----")
+                    print(f"Prefix:")
+                    print(f"  0.0.0.0/0")
+                    print(f"NextHop(type):")
+                    for i in range(len(default_gateway)):
+                        print(f"  {default_gateway[i]}")
                 else:
                     print(f"There is no route to {dest_addr}")
             else:
                     print(f"Route to {dest_addr} is found!")
-                    print(f"  Prefix: {match.prefix}")
-                    print(f"  NextHopType: {match.nexthoptype}")
-                    print(f"  NextHop: {match.nexthop}")
+                    print(f"----")
+                    print(f"Prefix: {match.prefix}")
+                    print(f"  {match.prefix}")
+                    print(f"NextHop(type):")
+                    for i in range(len(match.nexthop)):
+                        print(f"  {match.nexthop[i]}")
 
             return 0
 
